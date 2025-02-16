@@ -1,38 +1,36 @@
-require('dotenv').config(); // Load environment variables
-
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT || 5008; // Ensure it runs on 5008
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
-// Ensure the .env file is loaded
-console.log("MONGO_URI from .env:", process.env.MONGO_URI); // Debugging line
+// Load environment variables
+const PORT = process.env.PORT || 5008;
+const MONGO_URI = process.env.MONGO_URI;
 
-// MongoDB Connection
-const mongoURI = process.env.MONGO_URI; 
-
-if (!mongoURI) {
-    console.error("❌ MONGO_URI is missing or undefined. Please check your .env file.");
-    process.exit(1); // Stop the server if no MongoDB URI is found
+// Check if MongoDB URI is set
+if (!MONGO_URI) {
+    console.error("❌ ERROR: MONGO_URI is missing from .env file");
+    process.exit(1);
 }
 
-mongoose.connect(mongoURI, {
+// MongoDB Connection
+mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
 .then(() => console.log("✅ Database connected successfully!"))
-.catch(err => {
-    console.error("❌ Database connection failed:", err);
-    process.exit(1); // Stop the server if database connection fails
+.catch((error) => {
+    console.error("❌ Database connection failed:", error.message);
+    process.exit(1);
 });
 
-// Simple API Route
+// Simple API Route for Testing
 app.get("/", (req, res) => {
     res.send("🔥 XRP Management System is Running!");
 });
@@ -40,4 +38,14 @@ app.get("/", (req, res) => {
 // Start Server
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+});
+
+// Handle Errors (Prevents Crashes)
+process.on("uncaughtException", (err) => {
+    console.error("❌ Uncaught Exception:", err);
+    process.exit(1);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+    console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
 });
