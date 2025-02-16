@@ -30,7 +30,38 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
 });
 
-// Simple API Route for Testing
+// Sample Account Schema (for MongoDB)
+const accountSchema = new mongoose.Schema({
+    name: String,
+    balance: Number
+});
+const Account = mongoose.model("Account", accountSchema);
+
+// Test Route to Fetch Accounts
+app.get("/api/accounts", async (req, res) => {
+    try {
+        const accounts = await Account.find();
+        res.json(accounts);
+    } catch (error) {
+        console.error("Error fetching accounts:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// Route for Creating an Account
+app.post("/api/accounts", async (req, res) => {
+    try {
+        const { name, balance } = req.body;
+        const newAccount = new Account({ name, balance });
+        await newAccount.save();
+        res.status(201).json(newAccount);
+    } catch (error) {
+        console.error("Error creating account:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// Root Route
 app.get("/", (req, res) => {
     res.send("🔥 XRP Management System is Running!");
 });
